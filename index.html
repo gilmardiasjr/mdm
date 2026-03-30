@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MÉTODO DO MOVIMENTO | Dashboard de Evolução</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#033B4A',   // Dark Navy/Teal
+                        secondary: '#78C0C7', // Light Aqua/Teal
+                        bgLight: '#F8F9FA',   // Light Gray
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        title: ['Montserrat', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { background-color: #F8F9FA; color: #1f2937; }
+        
+        /* Typography overrides */
+        .title-font { font-family: 'Montserrat', sans-serif; letter-spacing: 0.05em; }
+        
+        /* Dotted Pattern Background */
+        .pattern-dots {
+            background-image: radial-gradient(#78C0C7 15%, transparent 15%);
+            background-size: 16px 16px;
+            background-position: 0 0;
+            position: relative;
+        }
+        .pattern-dots::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.85); /* Overlay to make dots subtle */
+            z-index: 0;
+        }
+
+        /* Diagonal Bars Pattern */
+        .pattern-diagonal {
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                #78C0C7 10px,
+                #78C0C7 20px
+            );
+            opacity: 0.8;
+        }
+
+        /* Drag & Drop Styles */
+        .drop-zone { transition: all 0.3s ease; }
+        .drop-zone--over { border-color: #033B4A !important; background-color: #f0f9fa !important; }
+
+        /* General Table Styles */
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 12px; border-bottom: 1px solid #e5e7eb; text-align: left; }
+        th { background-color: #033B4A; color: white; font-weight: 600; font-size: 0.875rem; text-transform: uppercase; }
+        tr:nth-child(even) { background-color: #f9fafb; }
+        tr:hover td { background-color: #f3f4f6; }
+
+        /* Chart container constraint */
+        .chart-container { position: relative; height: 320px; width: 100%; }
+
+        /* Ensure content stays clean on top of backgrounds */
+        .relative-content { position: relative; z-index: 10; }
+
+    </style>
+</head>
+<body class="font-sans min-h-screen flex flex-col items-center py-6">
+
+    <div id="pdf-wrapper" class="w-full max-w-6xl bg-white shadow-xl rounded-xl overflow-hidden flex flex-col relative">
+
+        <header class="pattern-dots border-b-4 border-primary">
+		<a href="teste.html" class="inline-block hover:opacity-80 transition-opacity cursor-pointer text-left" title="Voltar ao início">
+				<div class="relative-content flex flex-col md:flex-row justify-between items-center p-8 gap-8">
+					<div class="flex-1 text-center md:text-left">
+						<h1 class="title-font text-3xl md:text-4xl font-extrabold text-primary uppercase leading-tight">
+							MÉTODO DO<br>MOVIMENTO
+						</h1>
+						<p class="text-secondary font-bold tracking-widest uppercase mt-2 text-sm md:text-base">
+							Dashboard de Evolução
+						</p>
+						<div id="studentNameDisplay" class="mt-4 text-lg font-semibold text-gray-700 hidden">
+							<span id="studentNameLabel" class="text-primary title-font"></span>
+						</div>
+				</a>
+					</div>
+				
+					<div class="flex items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100 gap-6">
+						<div class="w-24 h-24 rounded-full border-4 border-primary flex items-center justify-center overflow-hidden bg-gray-50 flex-shrink-0">
+						<a href="https://linktr.ee/gilmardias.jr" class="inline-block hover:opacity-80 transition-opacity cursor-pointer text-left" title="linktree">
+							<img src="photo.jpg" alt="Foto do Profissional" class="w-full h-full object-cover">
+						</a>
+						</div>
+						<div class="flex flex-col justify-center">
+							<p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">@gilmar.dias_jr</p>
+							<h2 class="title-font text-xl font-bold text-primary leading-none mb-1">Gilmar Dias da Silva Jr.</h2>
+							<p class="text-sm font-semibold text-secondary uppercase mb-2">Mestre em Ciências da Saúde</p>
+							<p class="text-xs font-bold text-primary bg-blue-50 px-2 py-1 rounded inline-block w-max">CREF: [000000-G/UF]</p>
+						</div>
+					</div>
+
+				</div>
+				<div class="h-3 w-full pattern-diagonal"></div>
+			
+        </header>
+
+        <main class="flex-grow p-8">
+            
+            <section id="uploadSection" class="max-w-3xl mx-auto my-12">
+                <div id="dropZone" class="drop-zone border-2 border-dashed border-secondary rounded-2xl p-12 text-center bg-white shadow-sm cursor-pointer hover:shadow-md">
+                    <div class="mb-4 text-secondary flex justify-center">
+                        <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                        </svg>
+                    </div>
+                    <h2 class="title-font text-xl font-bold text-primary mb-2 uppercase">Importar Planilha de Acompanhamento</h2>
+                    <p class="text-gray-500 mb-6 text-sm">Arraste e solte o arquivo .xlsx ou .csv aqui</p>
+                    <input type="file" id="fileInput" class="hidden" accept=".xlsx, .xls, .csv">
+                    <button onclick="document.getElementById('fileInput').click()" class="bg-primary text-white font-bold py-3 px-8 rounded-lg shadow hover:bg-opacity-90 transition transform hover:-translate-y-0.5">
+                        Procurar Arquivo
+                    </button>
+                </div>
+            </section>
+
+            <section id="dashboardSection" class="hidden flex flex-col gap-8">
+                
+                <div id="actionButtonsContainer" class="flex flex-col md:flex-row justify-between items-center bg-gray-50 p-4 rounded-xl border border-gray-200 gap-4">
+                    <button id="toggleViewBtn" class="text-primary font-bold px-6 py-2 rounded border-2 border-primary hover:bg-primary hover:text-white transition w-full md:w-auto">
+                        Ver Tabela de Dados
+                    </button>
+                    <button id="exportPdfBtn" class="bg-primary text-white px-8 py-3 rounded-lg shadow-lg font-bold flex items-center justify-center gap-2 hover:bg-opacity-90 transition transform hover:-translate-y-0.5 w-full md:w-auto text-lg">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        Exportar Relatório PDF
+                    </button>
+                </div>
+
+                <div>
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="h-6 w-2 pattern-diagonal rounded"></div>
+                        <h3 class="title-font text-2xl text-primary font-bold uppercase">Resumo de Evolução</h3>
+                    </div>
+                    <div id="kpiContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        </div>
+                </div>
+
+                <div id="chartsContainerWrapper">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="h-6 w-2 pattern-diagonal rounded"></div>
+                        <h3 class="title-font text-2xl text-primary font-bold uppercase">Gráficos Interativos</h3>
+                    </div>
+                    <div id="chartsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        </div>
+                </div>
+
+                <div id="tableContainerWrapper" class="hidden">
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="h-6 w-2 pattern-diagonal rounded"></div>
+                        <h3 class="title-font text-2xl text-primary font-bold uppercase">Histórico de Dados</h3>
+                    </div>
+                    <div class="overflow-x-auto bg-white rounded-xl shadow-sm border border-gray-200">
+                        <table id="dataTable" class="min-w-full text-sm">
+                            <thead id="dataTableHead"></thead>
+                            <tbody id="dataTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </section>
+        </main>
+
+        <footer class="mt-auto">
+            <div class="h-4 w-full pattern-diagonal"></div>
+            <div class="bg-primary text-center py-4 text-xs text-white/70">
+                &copy; <span id="currentYear"></span> MÉTODO DO MOVIMENTO. Todos os direitos reservados.
+            </div>
+        </footer>
+
+    </div>
+
+    <script>
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+        // State Variables
+        let parsedRecords = [];
+        let dateColumnName = "";
+        let numericColumns = [];
+        let chartInstances = [];
+        let isTableView = false;
+
+        // DOM Elements
+        const fileInput = document.getElementById('fileInput');
+        const dropZone = document.getElementById('dropZone');
+        const uploadSection = document.getElementById('uploadSection');
+        const dashboardSection = document.getElementById('dashboardSection');
+        const toggleViewBtn = document.getElementById('toggleViewBtn');
+        const exportPdfBtn = document.getElementById('exportPdfBtn');
+        const studentNameDisplay = document.getElementById('studentNameDisplay');
+        const studentNameLabel = document.getElementById('studentNameLabel');
+        const actionButtonsContainer = document.getElementById('actionButtonsContainer');
+
+        // --- 1. DRAG & DROP HANDLING ---
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => dropZone.classList.add('drop-zone--over'), false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, () => dropZone.classList.remove('drop-zone--over'), false);
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            let dt = e.dataTransfer;
+            if(dt.files.length) handleFile(dt.files[0]);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            if(e.target.files.length) handleFile(e.target.files[0]);
+        });
+
+        // --- 2. FILE PARSING LOGIC (SheetJS) ---
+        function handleFile(file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const data = new Uint8Array(e.target.result);
+                const workbook = XLSX.read(data, { type: 'array' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                
+                const rawRows = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                processData(rawRows);
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function processData(dataRows) {
+            if (dataRows.length === 0) return alert("Arquivo vazio!");
+
+            let headerRowIndex = -1;
+            let dateColIndex = -1;
+            let possibleStudentName = "";
+
+            // Nome do aluno da Célula B4
+            if (dataRows.length > 3 && dataRows[3][1]) {
+                possibleStudentName = String(dataRows[3][1]).trim();
+            }
+
+            if(possibleStudentName) {
+                studentNameLabel.textContent = possibleStudentName;
+                studentNameDisplay.classList.remove('hidden');
+            }
+
+            for (let i = 0; i < Math.min(dataRows.length, 20); i++) {
+                const row = dataRows[i];
+                if (!row) continue;
+                
+                for (let j = 0; j < row.length; j++) {
+                    const cellVal = String(row[j] || "").trim().toLowerCase();
+                    if (cellVal === "data" || cellVal === "date") {
+                        headerRowIndex = i;
+                        dateColIndex = j;
+                        dateColumnName = row[j]; 
+                        break;
+                    }
+                }
+                if (headerRowIndex !== -1) break;
+            }
+
+            if (headerRowIndex === -1) {
+                return alert("Não foi possível encontrar a coluna 'Data' na planilha. Verifique o formato.");
+            }
+
+            const headers = dataRows[headerRowIndex];
+            parsedRecords = [];
+
+            for (let i = headerRowIndex + 1; i < dataRows.length; i++) {
+                const row = dataRows[i];
+                if (!row || row.length === 0) continue;
+                
+                let record = {};
+                
+                for (let j = 0; j < headers.length; j++) {
+                    let header = headers[j];
+                    if (header && String(header).trim().toLowerCase() !== 'idade') {
+                        
+                        let cellValue = row[j];
+                        
+                        // --- INÍCIO DA CONVERSÃO DE TEMPO ---
+                        // Verifica se o valor é um texto e se está no formato de minutos e segundos (ex: 1'15'', 2'01")
+                        if (typeof cellValue === 'string') {
+                            const timeMatch = cellValue.trim().match(/^(\d+)'(\d+)\D*$/);
+                            if (timeMatch) {
+                                const minutos = parseInt(timeMatch[1], 10);
+                                const segundos = parseInt(timeMatch[2], 10);
+                                cellValue = (minutos * 60) + segundos; // Converte tudo para segundos totais
+                            }
+                        }
+                        // --- FIM DA CONVERSÃO DE TEMPO ---
+
+                        record[header] = cellValue;
+                    }
+                }
+                
+                const dateVal = record[dateColumnName];
+                if (dateVal !== undefined && dateVal !== null && dateVal !== "") {
+                    if (typeof dateVal === 'number') {
+                        const date = new Date(Math.round((dateVal - 25569) * 86400 * 1000));
+                        record[dateColumnName] = date.toLocaleDateString('pt-BR');
+                    } else if (typeof dateVal === 'string') {
+                        const parts = dateVal.split('-');
+                        if(parts.length === 3) {
+                            record[dateColumnName] = `${parts[2]}/${parts[1]}/${parts[0]}`;
+                        }
+                    }
+                    parsedRecords.push(record);
+                }
+            }
+
+            parsedRecords = parsedRecords.filter(r => Object.keys(r).length > 1);
+
+            if(parsedRecords.length === 0) return alert("Nenhum dado válido encontrado.");
+
+            numericColumns = [];
+            headers.forEach(header => {
+                if (!header || header === dateColumnName || String(header).trim().toLowerCase() === 'idade') return;
+                
+                let numericCount = 0;
+                let totalCount = 0;
+
+                parsedRecords.forEach(record => {
+                    const val = record[header];
+                    if (val !== undefined && val !== null && val !== "") {
+                        totalCount++;
+                        let parsedVal = parseFloat(String(val).replace(',', '.'));
+                        if (!isNaN(parsedVal)) numericCount++;
+                    }
+                });
+
+                if (totalCount > 0 && (numericCount / totalCount) > 0.5) {
+                    numericColumns.push(header);
+                }
+            });
+
+            buildDashboard();
+        }
+
+        // --- 3. DASHBOARD RENDERING ---
+        function buildDashboard() {
+            uploadSection.classList.add('hidden');
+            dashboardSection.classList.remove('hidden');
+            renderKPIs();
+            renderCharts();
+            renderTable();
+        }
+
+        function renderKPIs() {
+            const container = document.getElementById('kpiContainer');
+            container.innerHTML = '';
+
+            if (parsedRecords.length < 2) return; 
+
+            const firstRecord = parsedRecords[0];
+            const lastRecord = parsedRecords[parsedRecords.length - 1];
+
+            const kpiCols = numericColumns;
+
+            kpiCols.forEach(col => {
+                const firstVal = parseFloat(String(firstRecord[col]).replace(',', '.'));
+                const lastVal = parseFloat(String(lastRecord[col]).replace(',', '.'));
+
+                if (!isNaN(firstVal) && !isNaN(lastVal)) {
+                    const diff = lastVal - firstVal;
+                    const isPositive = diff > 0;
+                    
+                    let sign = diff > 0 ? '+' : '';
+                    let colorClass = diff === 0 ? 'text-gray-500 bg-gray-100' : (isPositive ? 'text-emerald-600 bg-emerald-50' : 'text-blue-600 bg-blue-50');
+                    
+                    // Fixed: Removed truncate, added break-words and leading-relaxed to prevent horizontal clipping
+                    const card = `
+                        <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm relative overflow-hidden group hover:border-secondary transition flex flex-col h-full">
+                            <div class="absolute right-0 top-0 w-2 h-full bg-secondary opacity-0 group-hover:opacity-100 transition"></div>
+                            <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 break-words leading-relaxed" title="${col}">${col}</h4>
+                            <div class="flex items-end justify-between mt-auto">
+                                <span class="text-3xl font-bold text-primary title-font leading-none">${lastVal.toLocaleString('pt-BR', {maximumFractionDigits:2})}</span>
+                                <span class="text-sm font-semibold px-2 py-1 rounded ${colorClass} whitespace-nowrap">
+                                    ${sign}${diff.toLocaleString('pt-BR', {maximumFractionDigits:2})}
+                                </span>
+                            </div>
+                        </div>
+                    `;
+                    container.insertAdjacentHTML('beforeend', card);
+                }
+            });
+        }
+
+        function renderCharts() {
+            const container = document.getElementById('chartsContainer');
+            container.innerHTML = '';
+            
+            chartInstances.forEach(chart => chart.destroy());
+            chartInstances = [];
+
+            const labels = parsedRecords.map(r => r[dateColumnName]);
+
+            Chart.defaults.animation = false; // Disable for immediate render (great for PDF)
+
+            numericColumns.forEach(col => {
+                const data = parsedRecords.map(r => {
+                    let val = r[col];
+                    if(val === undefined || val === null || val === "") return null;
+                    return parseFloat(String(val).replace(',', '.'));
+                });
+                
+                const wrapper = document.createElement('div');
+                wrapper.className = 'bg-white p-5 rounded-xl border border-gray-100 shadow-sm relative';
+                
+                const title = document.createElement('h4');
+                title.className = 'font-bold text-primary mb-4 title-font uppercase tracking-wide border-b border-gray-100 pb-2 break-words leading-relaxed text-sm';
+                title.textContent = col;
+                wrapper.appendChild(title);
+
+                const canvasContainer = document.createElement('div');
+                canvasContainer.className = 'chart-container';
+                const canvas = document.createElement('canvas');
+                canvasContainer.appendChild(canvas);
+                wrapper.appendChild(canvasContainer);
+
+                container.appendChild(wrapper);
+
+                const ctx = canvas.getContext('2d');
+                const newChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: col,
+                            data: data,
+                            borderColor: '#78C0C7',     
+                            backgroundColor: 'rgba(120, 192, 199, 0.15)',
+                            borderWidth: 3,
+                            pointBackgroundColor: '#033B4A', 
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 2,
+                            pointRadius: 5,
+                            pointHoverRadius: 7,
+                            fill: true,
+                            tension: 0.4 
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: {
+                            x: { grid: { display: false }, ticks: { font: { family: 'Inter' } } },
+                            y: { grid: { color: '#f3f4f6' }, ticks: { font: { family: 'Inter' } } }
+                        }
+                    }
+                });
+                chartInstances.push(newChart);
+            });
+        }
+
+        function renderTable() {
+            const thead = document.getElementById('dataTableHead');
+            const tbody = document.getElementById('dataTableBody');
+            thead.innerHTML = ''; tbody.innerHTML = '';
+
+            const allHeaders = [dateColumnName, ...Object.keys(parsedRecords[0]).filter(k => k !== dateColumnName)];
+
+            const trHead = document.createElement('tr');
+            allHeaders.forEach(header => {
+                const th = document.createElement('th');
+                th.textContent = header;
+                trHead.appendChild(th);
+            });
+            thead.appendChild(trHead);
+
+            parsedRecords.forEach(record => {
+                const tr = document.createElement('tr');
+                allHeaders.forEach(header => {
+                    const td = document.createElement('td');
+                    let val = record[header];
+                    
+                    if (numericColumns.includes(header) && val !== undefined && val !== null && val !== "") {
+                        let parsedVal = parseFloat(String(val).replace(',', '.'));
+                        td.textContent = !isNaN(parsedVal) ? parsedVal.toLocaleString('pt-BR', {maximumFractionDigits:2}) : val;
+                    } else {
+                        td.textContent = val !== undefined ? val : '-';
+                    }
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- 4. INTERACTIONS & EXPORT ---
+        toggleViewBtn.addEventListener('click', () => {
+            isTableView = !isTableView;
+            const chartsWrapper = document.getElementById('chartsContainerWrapper');
+            const tableWrapper = document.getElementById('tableContainerWrapper');
+
+            if (isTableView) {
+                chartsWrapper.classList.add('hidden');
+                tableWrapper.classList.remove('hidden');
+                toggleViewBtn.textContent = 'Ver Gráficos';
+            } else {
+                chartsWrapper.classList.remove('hidden');
+                tableWrapper.classList.add('hidden');
+                toggleViewBtn.textContent = 'Ver Tabela de Dados';
+            }
+        });
+
+        // PDF EXPORT FIXES
+        exportPdfBtn.addEventListener('click', async () => {
+            // Save original UI states
+            const originalText = exportPdfBtn.innerHTML;
+            const chartsWrapper = document.getElementById('chartsContainerWrapper');
+            const tableWrapper = document.getElementById('tableContainerWrapper');
+            
+            const wasTableHidden = tableWrapper.classList.contains('hidden');
+            const wasChartsHidden = chartsWrapper.classList.contains('hidden');
+
+            try {
+                // UI updates before generating
+                exportPdfBtn.innerHTML = 'Processando...';
+                exportPdfBtn.disabled = true;
+
+                // 1. Hide buttons container completely so it skips the capture
+                actionButtonsContainer.style.display = 'none';
+
+                // 2. Force BOTH charts and table to be visible at the same time
+                chartsWrapper.classList.remove('hidden');
+                tableWrapper.classList.remove('hidden');
+
+                // 3. Scroll to top to avoid html2canvas capturing blank space/cutting off
+                window.scrollTo(0, 0);
+
+                // Small delay to ensure browser repainted the unhidden elements
+                await new Promise(r => setTimeout(r, 400));
+
+                const wrapper = document.getElementById('pdf-wrapper');
+                
+                const canvas = await html2canvas(wrapper, {
+                    scale: 2, 
+                    useCORS: true,
+                    backgroundColor: '#ffffff',
+                    scrollY: -window.scrollY // Compensates for any page scroll issues
+                });
+
+                const imgData = canvas.toDataURL('image/jpeg', 1.0);
+                
+                // Set fixed width for standard sizing, but let HEIGHT be dynamic to fit everything
+                const imgWidth = 210; // 210mm is A4 width
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                
+                // 4. Generate a SINGLE continuous page PDF with custom format
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({
+                    orientation: 'p',
+                    unit: 'mm',
+                    format: [imgWidth, imgHeight]
+                });
+
+                pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight);
+                
+                let fileName = "Relatorio_Evolucao.pdf";
+                if(studentNameLabel.textContent) {
+                    fileName = `Relatorio_${studentNameLabel.textContent.replace(/\s+/g, '_')}.pdf`;
+                }
+                
+                pdf.save(fileName);
+
+            } catch (error) {
+                console.error("Erro na geração do PDF:", error);
+                alert("Falha ao gerar o PDF. Verifique o console.");
+            } finally {
+                // Restore original UI state after capture
+                actionButtonsContainer.style.display = '';
+                
+                if (wasTableHidden) tableWrapper.classList.add('hidden');
+                if (wasChartsHidden) chartsWrapper.classList.add('hidden');
+
+                exportPdfBtn.innerHTML = originalText;
+                exportPdfBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
