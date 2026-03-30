@@ -91,38 +91,39 @@
     <div id="pdf-wrapper" class="w-full max-w-6xl bg-white shadow-xl rounded-xl overflow-hidden flex flex-col relative">
 
         <header class="pattern-dots border-b-4 border-primary">
-		<a href="https://gilmardiasjr.github.io/mdm/" class="inline-block hover:opacity-80 transition-opacity cursor-pointer text-left" title="Voltar ao início">
-				<div class="relative-content flex flex-col md:flex-row justify-between items-center p-8 gap-8">
-					<div class="flex-1 text-center md:text-left">
-						<h1 class="title-font text-3xl md:text-4xl font-extrabold text-primary uppercase leading-tight">
-							MÉTODO DO<br>MOVIMENTO
-						</h1>
-						<p class="text-secondary font-bold tracking-widest uppercase mt-2 text-sm md:text-base">
-							Dashboard de Evolução
-						</p>
-						<div id="studentNameDisplay" class="mt-4 text-lg font-semibold text-gray-700 hidden">
-							<span id="studentNameLabel" class="text-primary title-font"></span>
-						</div>
-				</a>
-					</div>
-				
-					<div class="flex items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100 gap-6">
-						<div class="w-24 h-24 rounded-full border-4 border-primary flex items-center justify-center overflow-hidden bg-gray-50 flex-shrink-0">
+            <div class="relative-content flex flex-col md:flex-row justify-between items-center p-8 gap-8">
+                
+                <div class="flex-1 text-center md:text-left">
+                    <a href="https://gilmardiasjr.github.io/mdm/" class="inline-block hover:opacity-80 transition-opacity cursor-pointer text-left" title="Voltar ao início">
+                        <h1 class="title-font text-3xl md:text-4xl font-extrabold text-primary uppercase leading-tight">
+                            MÉTODO DO<br>MOVIMENTO
+                        </h1>
+                        <p class="text-secondary font-bold tracking-widest uppercase mt-2 text-sm md:text-base">
+                            Dashboard de Evolução
+                        </p>
+                    </a>
+                    
+                    <div id="studentNameDisplay" class="mt-4 text-lg font-semibold text-gray-700 hidden">
+                        <span id="studentNameLabel" class="text-primary title-font"></span>
+                    </div>
+                </div>
+
+                <div class="flex items-center bg-white p-4 rounded-xl shadow-sm border border-gray-100 gap-6">
+                    <div class="w-24 h-24 rounded-full border-4 border-primary flex items-center justify-center overflow-hidden bg-gray-50 flex-shrink-0">
 						<a href="https://linktr.ee/gilmardias.jr" class="inline-block hover:opacity-80 transition-opacity cursor-pointer text-left" title="linktree">
 							<img src="https://raw.githubusercontent.com/gilmardiasjr/mdm/refs/heads/main/photo.JPG" alt="Foto do Profissional" class="w-full h-full object-cover">
 						</a>
-						</div>
-						<div class="flex flex-col justify-center">
-							<p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">@gilmar.dias_jr</p>
-							<h2 class="title-font text-xl font-bold text-primary leading-none mb-1">Gilmar Dias da Silva Jr.</h2>
-							<p class="text-sm font-semibold text-secondary uppercase mb-2">Mestre em Ciências da Saúde</p>
-							<p class="text-xs font-bold text-primary bg-blue-50 px-2 py-1 rounded inline-block w-max">CREF: 164615-G/SP</p>
-						</div>
-					</div>
+                    </div>
+                    <div class="flex flex-col justify-center">
+                        <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">@gilmar.dias_jr</p>
+                        <h2 class="title-font text-xl font-bold text-primary leading-none mb-1">Gilmar Dias da Silva Jr.</h2>
+                        <p class="text-sm font-semibold text-secondary uppercase mb-2">Mestre em Ciências da Saúde</p>
+                        <p class="text-xs font-bold text-primary bg-blue-50 px-2 py-1 rounded inline-block w-max">CREF: 164615-G/SP</p>
+                    </div>
+                </div>
 
-				</div>
-				<div class="h-3 w-full pattern-diagonal"></div>
-			
+            </div>
+            <div class="h-3 w-full pattern-diagonal"></div>
         </header>
 
         <main class="flex-grow p-8">
@@ -161,7 +162,7 @@
                         <h3 class="title-font text-2xl text-primary font-bold uppercase">Resumo de Evolução</h3>
                     </div>
                     <div id="kpiContainer" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                        </div>
+                    </div>
                 </div>
 
                 <div id="chartsContainerWrapper">
@@ -170,7 +171,7 @@
                         <h3 class="title-font text-2xl text-primary font-bold uppercase">Gráficos Interativos</h3>
                     </div>
                     <div id="chartsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                        </div>
+                    </div>
                 </div>
 
                 <div id="tableContainerWrapper" class="hidden">
@@ -265,7 +266,6 @@
             let dateColIndex = -1;
             let possibleStudentName = "";
 
-            // Nome do aluno da Célula B4
             if (dataRows.length > 3 && dataRows[3][1]) {
                 possibleStudentName = String(dataRows[3][1]).trim();
             }
@@ -307,21 +307,15 @@
                 for (let j = 0; j < headers.length; j++) {
                     let header = headers[j];
                     if (header && String(header).trim().toLowerCase() !== 'idade') {
-                        
                         let cellValue = row[j];
-                        
-                        // --- INÍCIO DA CONVERSÃO DE TEMPO ---
-                        // Verifica se o valor é um texto e se está no formato de minutos e segundos (ex: 1'15'', 2'01")
                         if (typeof cellValue === 'string') {
                             const timeMatch = cellValue.trim().match(/^(\d+)'(\d+)\D*$/);
                             if (timeMatch) {
                                 const minutos = parseInt(timeMatch[1], 10);
                                 const segundos = parseInt(timeMatch[2], 10);
-                                cellValue = (minutos * 60) + segundos; // Converte tudo para segundos totais
+                                cellValue = (minutos * 60) + segundos;
                             }
                         }
-                        // --- FIM DA CONVERSÃO DE TEMPO ---
-
                         record[header] = cellValue;
                     }
                 }
@@ -348,19 +342,17 @@
             numericColumns = [];
             headers.forEach(header => {
                 if (!header || header === dateColumnName || String(header).trim().toLowerCase() === 'idade') return;
-                
                 let numericCount = 0;
                 let totalCount = 0;
-
                 parsedRecords.forEach(record => {
                     const val = record[header];
                     if (val !== undefined && val !== null && val !== "") {
                         totalCount++;
                         let parsedVal = parseFloat(String(val).replace(',', '.'));
-                        if (!isNaN(parsedVal)) numericCount++;
+                        // Se for diferente de zero, a gente conta como número válido para gerar gráfico
+                        if (!isNaN(parsedVal) && parsedVal !== 0) numericCount++;
                     }
                 });
-
                 if (totalCount > 0 && (numericCount / totalCount) > 0.5) {
                     numericColumns.push(header);
                 }
@@ -386,21 +378,19 @@
 
             const firstRecord = parsedRecords[0];
             const lastRecord = parsedRecords[parsedRecords.length - 1];
-
             const kpiCols = numericColumns;
 
             kpiCols.forEach(col => {
                 const firstVal = parseFloat(String(firstRecord[col]).replace(',', '.'));
                 const lastVal = parseFloat(String(lastRecord[col]).replace(',', '.'));
 
-                if (!isNaN(firstVal) && !isNaN(lastVal)) {
+                // Ignorar também se os valores da ponta forem nulos ou 0 no cálculo dos cards
+                if (!isNaN(firstVal) && !isNaN(lastVal) && firstVal !== 0 && lastVal !== 0) {
                     const diff = lastVal - firstVal;
                     const isPositive = diff > 0;
-                    
                     let sign = diff > 0 ? '+' : '';
                     let colorClass = diff === 0 ? 'text-gray-500 bg-gray-100' : (isPositive ? 'text-emerald-600 bg-emerald-50' : 'text-blue-600 bg-blue-50');
                     
-                    // Fixed: Removed truncate, added break-words and leading-relaxed to prevent horizontal clipping
                     const card = `
                         <div class="bg-white p-5 rounded-xl border border-gray-100 shadow-sm relative overflow-hidden group hover:border-secondary transition flex flex-col h-full">
                             <div class="absolute right-0 top-0 w-2 h-full bg-secondary opacity-0 group-hover:opacity-100 transition"></div>
@@ -426,21 +416,39 @@
             chartInstances = [];
 
             const labels = parsedRecords.map(r => r[dateColumnName]);
-
-            Chart.defaults.animation = false; // Disable for immediate render (great for PDF)
+            Chart.defaults.animation = false;
 
             numericColumns.forEach(col => {
+                
+                let sum = 0;
+                let count = 0;
+
                 const data = parsedRecords.map(r => {
                     let val = r[col];
-                    if(val === undefined || val === null || val === "") return null;
-                    return parseFloat(String(val).replace(',', '.'));
+                    // Trata valores nulos ou vazios
+                    if(val === undefined || val === null || String(val).trim() === "") return null;
+                    
+                    let parsedVal = parseFloat(String(val).replace(',', '.'));
+                    
+                    // LÓGICA ATUALIZADA: Ignora ZEROS
+                    if (!isNaN(parsedVal) && parsedVal !== 0) {
+                        sum += parsedVal;
+                        count++;
+                        return parsedVal;
+                    }
+                    // Se for 0 ou NaN, retorna nulo para ignorar na linha do gráfico
+                    return null;
                 });
                 
+                const average = count > 0 ? sum / count : 0;
+                const avgFormatted = average.toLocaleString('pt-BR', {maximumFractionDigits: 1});
+                const averageData = labels.map(() => average);
+
                 const wrapper = document.createElement('div');
                 wrapper.className = 'bg-white p-5 rounded-xl border border-gray-100 shadow-sm relative';
                 
                 const title = document.createElement('h4');
-                title.className = 'font-bold text-primary mb-4 title-font uppercase tracking-wide border-b border-gray-100 pb-2 break-words leading-relaxed text-sm';
+                title.className = 'font-bold text-primary mb-2 title-font uppercase tracking-wide border-b border-gray-100 pb-2 break-words leading-relaxed text-sm';
                 title.textContent = col;
                 wrapper.appendChild(title);
 
@@ -457,25 +465,46 @@
                     type: 'line',
                     data: {
                         labels: labels,
-                        datasets: [{
-                            label: col,
-                            data: data,
-                            borderColor: '#78C0C7',     
-                            backgroundColor: 'rgba(120, 192, 199, 0.15)',
-                            borderWidth: 3,
-                            pointBackgroundColor: '#033B4A', 
-                            pointBorderColor: '#ffffff',
-                            pointBorderWidth: 2,
-                            pointRadius: 5,
-                            pointHoverRadius: 7,
-                            fill: true,
-                            tension: 0.4 
-                        }]
+                        datasets: [
+                            {
+                                label: col,
+                                data: data,
+                                spanGaps: true, // LÓGICA ATUALIZADA: Conecta os pontos mesmo com "buracos" (valores nulos/zeros)
+                                borderColor: '#78C0C7',     
+                                backgroundColor: 'rgba(120, 192, 199, 0.15)',
+                                borderWidth: 3,
+                                pointBackgroundColor: '#033B4A', 
+                                pointBorderColor: '#ffffff',
+                                pointBorderWidth: 2,
+                                pointRadius: 5,
+                                pointHoverRadius: 7,
+                                fill: true,
+                                tension: 0.4 
+                            },
+                            {
+                                label: `Média (${avgFormatted})`, 
+                                data: averageData,
+                                borderColor: '#f59e0b', 
+                                borderWidth: 2,
+                                borderDash: [6, 6], 
+                                pointRadius: 0, 
+                                pointHoverRadius: 0,
+                                fill: false,
+                                tension: 0 
+                            }
+                        ]
                     },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
-                        plugins: { legend: { display: false } },
+                        plugins: { 
+                            legend: { 
+                                display: true,
+                                position: 'top',
+                                align: 'end',
+                                labels: { usePointStyle: true, boxWidth: 8, font: { family: 'Inter', size: 11 } }
+                            } 
+                        },
                         scales: {
                             x: { grid: { display: false }, ticks: { font: { family: 'Inter' } } },
                             y: { grid: { color: '#f3f4f6' }, ticks: { font: { family: 'Inter' } } }
@@ -538,7 +567,6 @@
 
         // PDF EXPORT FIXES
         exportPdfBtn.addEventListener('click', async () => {
-            // Save original UI states
             const originalText = exportPdfBtn.innerHTML;
             const chartsWrapper = document.getElementById('chartsContainerWrapper');
             const tableWrapper = document.getElementById('tableContainerWrapper');
@@ -547,21 +575,16 @@
             const wasChartsHidden = chartsWrapper.classList.contains('hidden');
 
             try {
-                // UI updates before generating
                 exportPdfBtn.innerHTML = 'Processando...';
                 exportPdfBtn.disabled = true;
 
-                // 1. Hide buttons container completely so it skips the capture
                 actionButtonsContainer.style.display = 'none';
 
-                // 2. Force BOTH charts and table to be visible at the same time
                 chartsWrapper.classList.remove('hidden');
                 tableWrapper.classList.remove('hidden');
 
-                // 3. Scroll to top to avoid html2canvas capturing blank space/cutting off
                 window.scrollTo(0, 0);
 
-                // Small delay to ensure browser repainted the unhidden elements
                 await new Promise(r => setTimeout(r, 400));
 
                 const wrapper = document.getElementById('pdf-wrapper');
@@ -570,16 +593,14 @@
                     scale: 2, 
                     useCORS: true,
                     backgroundColor: '#ffffff',
-                    scrollY: -window.scrollY // Compensates for any page scroll issues
+                    scrollY: -window.scrollY
                 });
 
                 const imgData = canvas.toDataURL('image/jpeg', 1.0);
                 
-                // Set fixed width for standard sizing, but let HEIGHT be dynamic to fit everything
-                const imgWidth = 210; // 210mm is A4 width
+                const imgWidth = 210; 
                 const imgHeight = (canvas.height * imgWidth) / canvas.width;
                 
-                // 4. Generate a SINGLE continuous page PDF with custom format
                 const { jsPDF } = window.jspdf;
                 const pdf = new jsPDF({
                     orientation: 'p',
@@ -600,7 +621,6 @@
                 console.error("Erro na geração do PDF:", error);
                 alert("Falha ao gerar o PDF. Verifique o console.");
             } finally {
-                // Restore original UI state after capture
                 actionButtonsContainer.style.display = '';
                 
                 if (wasTableHidden) tableWrapper.classList.add('hidden');
